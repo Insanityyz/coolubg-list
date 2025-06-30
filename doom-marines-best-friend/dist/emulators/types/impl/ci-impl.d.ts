@@ -10,6 +10,7 @@ export declare class CommandInterfaceEventsImpl implements CommandInterfaceEvent
     private delayedMessages;
     private onNetworkConnectedConsumers;
     private onNetworkDisconnectedConsumers;
+    private onUnloadConsumers;
     onStdout: (consumer: (message: string) => void) => void;
     onFrameSize: (consumer: (width: number, height: number) => void) => void;
     onFrame: (consumer: (rgb: Uint8Array | null, rgba: Uint8Array | null) => void) => void;
@@ -18,6 +19,7 @@ export declare class CommandInterfaceEventsImpl implements CommandInterfaceEvent
     onMessage: (consumer: (msgType: MessageType, ...args: any[]) => void) => void;
     onNetworkConnected(consumer: (networkType: NetworkType, address: string) => void): void;
     onNetworkDisconnected(consumer: (networkType: NetworkType) => void): void;
+    onUnload: (consumer: () => Promise<void>) => void;
     fireStdout: (message: string) => void;
     fireFrameSize: (width: number, height: number) => void;
     fireFrame: (rgb: Uint8Array | null, rgba: Uint8Array | null) => void;
@@ -26,4 +28,5 @@ export declare class CommandInterfaceEventsImpl implements CommandInterfaceEvent
     fireMessage: (msgType: MessageType, ...args: any[]) => void;
     fireNetworkConnected: (networkType: NetworkType, address: string) => void;
     fireNetworkDisconnected: (networkType: NetworkType) => void;
+    fireUnload: () => Promise<void>;
 }

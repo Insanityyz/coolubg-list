@@ -4,6 +4,7 @@ import DosBundle from "../dos/bundle/dos-bundle";
 import { TransportLayer } from "../protocol/protocol";
 declare class EmulatorsImpl implements Emulators {
     pathPrefix: string;
+    pathSuffix: string;
     version: string;
     wdosboxJs: string;
     wdosboxxJs: string;

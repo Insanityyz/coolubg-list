@@ -1,7 +1,7 @@
-import { CommandInterface, NetworkType, BackendOptions, DosConfig, InitFsEntry } from "../emulators";
+import { CommandInterface, NetworkType, BackendOptions, DosConfig, InitFsEntry, PersistedSockdrives } from "../emulators";
 import { CommandInterfaceEventsImpl } from "../impl/ci-impl";
-export type ClientMessage = "wc-install" | "wc-run" | "wc-pack-fs-to-bundle" | "wc-add-key" | "wc-mouse-move" | "wc-mouse-button" | "wc-mouse-sync" | "wc-exit" | "wc-sync-sleep" | "wc-pause" | "wc-resume" | "wc-mute" | "wc-unmute" | "wc-connect" | "wc-disconnect" | "wc-backend-event" | "wc-asyncify-stats" | "wc-fs-tree" | "wc-fs-get-file" | "wc-send-data-chunk" | "wc-net-connected" | "wc-net-received";
-export type ServerMessage = "ws-extract-progress" | "ws-ready" | "ws-server-ready" | "ws-frame-set-size" | "ws-update-lines" | "ws-log" | "ws-warn" | "ws-err" | "ws-stdout" | "ws-exit" | "ws-persist" | "ws-sound-init" | "ws-sound-push" | "ws-config" | "ws-sync-sleep" | "ws-connected" | "ws-disconnected" | "ws-asyncify-stats" | "ws-fs-tree" | "ws-send-data-chunk" | "ws-net-connect" | "ws-net-disconnect" | "ws-net-send";
+export type ClientMessage = "wc-install" | "wc-run" | "wc-pack-fs-to-bundle" | "wc-add-key" | "wc-mouse-move" | "wc-mouse-button" | "wc-mouse-sync" | "wc-exit" | "wc-sync-sleep" | "wc-pause" | "wc-resume" | "wc-mute" | "wc-unmute" | "wc-connect" | "wc-disconnect" | "wc-backend-event" | "wc-asyncify-stats" | "wc-fs-tree" | "wc-fs-get-file" | "wc-send-data-chunk" | "wc-net-connected" | "wc-net-received" | "wc-sockdrive-opened" | "wc-sockdrive-new-range" | "wc-unload" | "wc-fs-delete-file";
+export type ServerMessage = "ws-extract-progress" | "ws-ready" | "ws-server-ready" | "ws-frame-set-size" | "ws-update-lines" | "ws-log" | "ws-warn" | "ws-err" | "ws-stdout" | "ws-exit" | "ws-persist" | "ws-sound-init" | "ws-sound-push" | "ws-config" | "ws-sync-sleep" | "ws-connected" | "ws-disconnected" | "ws-asyncify-stats" | "ws-fs-tree" | "ws-send-data-chunk" | "ws-net-connect" | "ws-net-disconnect" | "ws-net-send" | "ws-sockdrive-open" | "ws-sockdrive-ready" | "ws-sockdrive-close" | "ws-sockdrive-load-range" | "ws-sockdrive-write-sector" | "ws-unload" | "ws-fs-delete-file";
 export type MessageHandler = (name: ServerMessage, props: {
     [key: string]: any;
 }) => void;
@@ -33,13 +33,10 @@ export interface AsyncifyStats {
     cycles: number;
     netSent: number;
     netRecv: number;
-    driveSent: number;
-    driveRecv: number;
-    driveRecvTime: number;
-    driveCacheHit: number;
-    driveCacheMiss: number;
-    driveCacheUsed: number;
     driveIo: {
+        url: string;
+        preload: number;
+        total: number;
         read: number;
         write: number;
     }[];
@@ -82,10 +79,13 @@ export declare class CommandInterfaceOverTransportLayer implements CommandInterf
     private fsGetFilePromise;
     private fsGetFileResolve;
     private fsGetFileParts;
+    private fsDeleteFilePromise;
+    private fsDeleteFileResolve;
     private dataChunkPromise;
     private dataChunkResolve;
     private networkId;
     private network;
+    private sockdrives;
     options: BackendOptions;
     constructor(init: InitFsEntry[], transport: TransportLayer, ready: (err: Error | null) => void, options: BackendOptions);
     private sendClientMessage;
@@ -112,7 +112,7 @@ export declare class CommandInterfaceOverTransportLayer implements CommandInterf
     sendMouseButton(button: number, pressed: boolean): void;
     sendMouseSync(): void;
     sendBackendEvent(payload: any): void;
-    persist(onlyChanges?: boolean): Promise<Uint8Array | null>;
+    persist(optOnlyChanges?: boolean): Promise<Uint8Array | PersistedSockdrives | null>;
     private onPersist;
     pause(): void;
     resume(): void;
@@ -127,7 +127,8 @@ export declare class CommandInterfaceOverTransportLayer implements CommandInterf
     fsTree(): Promise<FsNode>;
     fsReadFile(file: string): Promise<Uint8Array>;
     fsWriteFile(file: string, contents: ReadableStream<Uint8Array> | Uint8Array): Promise<void>;
-    fsDeleteFile(file: string): Promise<void>;
+    fsDeleteFile(file: string): Promise<boolean>;
+    persistSockdrives(): Promise<PersistedSockdrives>;
     private sendDataChunk;
     private sendFullDataChunk;
     private dataChunkKey;

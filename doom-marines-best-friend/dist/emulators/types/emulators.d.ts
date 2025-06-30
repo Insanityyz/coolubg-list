@@ -20,8 +20,15 @@ export interface InitFileEntry {
 }
 export type InitFsEntry = InitBundleEntry | InitFileEntry | DosConfig | string;
 export type InitFs = InitFsEntry | InitFsEntry[];
+export type PersistedSockdrives = {
+    drives: {
+        url: string;
+        persist: Uint8Array;
+    }[];
+} | null;
 export interface Emulators {
     pathPrefix: string;
+    pathSuffix: string;
     version: string;
     wdosboxJs: string;
     bundle: () => Promise<DosBundle>;
@@ -53,7 +60,7 @@ export interface CommandInterface {
     sendMouseButton: (button: number, pressed: boolean) => void;
     sendMouseSync: () => void;
     sendBackendEvent: (event: any) => void;
-    persist(onlyChanges?: boolean): Promise<Uint8Array | null>;
+    persist(onlyChanges?: boolean): Promise<Uint8Array | PersistedSockdrives | null>;
     events(): CommandInterfaceEvents;
     networkConnect(networkType: NetworkType, address: string): Promise<void>;
     networkDisconnect(networkType: NetworkType): Promise<void>;
@@ -61,7 +68,7 @@ export interface CommandInterface {
     fsTree(): Promise<FsNode>;
     fsReadFile(file: string): Promise<Uint8Array>;
     fsWriteFile(file: string, contents: ReadableStream<Uint8Array> | Uint8Array): Promise<void>;
-    fsDeleteFile(file: string): Promise<void>;
+    fsDeleteFile(file: string): Promise<boolean>;
 }
 export type MessageType = "log" | "warn" | "error" | string;
 export interface CommandInterfaceEvents {
@@ -73,4 +80,5 @@ export interface CommandInterfaceEvents {
     onMessage: (consumer: (msgType: MessageType, ...args: any[]) => void) => void;
     onNetworkConnected: (consumer: (networkType: NetworkType, address: string) => void) => void;
     onNetworkDisconnected: (consumer: (networkType: NetworkType) => void) => void;
+    onUnload: (consumer: () => Promise<void>) => void;
 }

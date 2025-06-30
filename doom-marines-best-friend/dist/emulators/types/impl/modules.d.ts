@@ -25,13 +25,14 @@ declare class Host {
 export declare const host: Host;
 export declare class WasmModulesImpl implements IWasmModules {
     private pathPrefix;
+    private pathSuffix;
     private wdosboxJs;
     private wdosboxxJs;
     private libzipPromise?;
     private dosboxPromise?;
     private dosboxxPromise?;
     wasmSupported: boolean;
-    constructor(pathPrefix: string, wdosboxJs: string, wdosboxxJs: string);
+    constructor(pathPrefix: string, pathSuffix: string, wdosboxJs: string, wdosboxxJs: string);
     libzip(): Promise<WasmModule>;
     dosbox(): Promise<WasmModule>;
     dosboxx(): Promise<WasmModule>;
